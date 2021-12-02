@@ -26,16 +26,17 @@ def get_command_handler(command):
 
 def forward_handler(position, move):
     position["h"] = position["h"] + move
+    position["d"] = position["d"] + move * position["aim"]
     return position
 
 
 def down_handler(position, move):
-    position["d"] = position["d"] + move
+    position["aim"] = position["aim"] + move
     return position
 
 
 def up_handler(position, move):
-    position["d"] = position["d"] - move
+    position["aim"] = position["aim"] - move
     return position
 
 
@@ -48,7 +49,7 @@ def calculate_move_and_mutiply_results(moves, position):
 def main(filename):
     file_data = get_data_from_file(filename)
     moves = extract_moves_from_file_data(file_data)
-    position = {"h": 0, "d": 0}
+    position = {"h": 0, "d": 0, "aim": 0}
     calculate_move_and_mutiply_results(moves, position)
 
 
@@ -62,5 +63,5 @@ def get_data_from_file(filename):
     return file_data
 
 
-if __name__ == '__main__':
-    main('day_2.txt')
+if __name__ == "__main__":
+    main("day_2.txt")
