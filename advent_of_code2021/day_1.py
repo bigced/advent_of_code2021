@@ -1,15 +1,12 @@
+from advent_of_code2021.common import get_data_from_file
+
+
 def count_increases(data):
     increases_count = []
     for i in range(len(data) - 1):
         increased = True if data[i] < data[i + 1] else False
         increases_count.append(increased)
     return sum(increases_count)
-
-
-def get_data_from_file(filename):
-    with open(filename) as f:
-        file_data = f.read()
-    return file_data
 
 
 def extract_depth_data(depth_data):
