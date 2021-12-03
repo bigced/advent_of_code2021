@@ -17,10 +17,15 @@ def calculate_rate(data, function):
 
 
 def calculate_rate_bit(data, score, pos, function):
+    bit_at_one, bit_at_zero = get_0_and_1(data, pos)
+    score.append(function(bit_at_one, bit_at_zero))
+
+
+def get_0_and_1(data, pos):
     bits_in_pos = get_bit_by_position(data, pos)
     bit_at_one = sum([_ == "1" for _ in bits_in_pos])
     bit_at_zero = sum([_ == "0" for _ in bits_in_pos])
-    score.append(function(bit_at_one, bit_at_zero))
+    return bit_at_one, bit_at_zero
 
 
 def gamma_score_bit_calculation(bit_at_one, bit_at_zero):
@@ -54,5 +59,49 @@ def main(filename):
     print(f"The power consumption is {power}")
 
 
+def calculate_o2_generator_rate(data):
+    filtered_data = data
+    for pos in range(len(data[0])):
+        filtered_data = filter_result_by_bit_position(filtered_data, pos, o2_condition)
+    return convert_string_to_binary(filtered_data[0])
+
+
+def filter_result_by_bit_position(data, position, condition_function):
+    bit_at_one, bit_at_zero = get_0_and_1(data, position)
+    filtered_data = []
+    condition = condition_function(bit_at_one, bit_at_zero)
+    filtered_data = [_ for _ in data if _[position] == condition]
+    return filtered_data
+
+
+def o2_condition(bit_at_one, bit_at_zero):
+    return "0" if bit_at_zero > bit_at_one else "1"
+
+
+def co2_scrubber(bit_at_one, bit_at_zero):
+    return "1" if bit_at_zero > bit_at_one else "0"
+
+
+def calculate_co2_scrubbing_rate(data):
+    filtered_data = data
+    for pos in range(len(data[0])):
+        filtered_data = filter_result_by_bit_position(filtered_data, pos, co2_scrubber)
+        if len(filtered_data) == 1:
+            break
+    return convert_string_to_binary(filtered_data[0])
+
+
+def calculate_life_support_rating_from_data(data):
+    return calculate_co2_scrubbing_rate(data) * calculate_o2_generator_rate(data)
+
+
+def main2(filename):
+    file_data = get_data_from_file(filename)
+    data = extract_data(file_data)
+    life_support_rating = calculate_life_support_rating_from_data(data)
+    print(f"the life support rating {life_support_rating}")
+
+
 if __name__ == "__main__":
     main("day_3.txt")
+    main2("day_3.txt")
