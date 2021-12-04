@@ -2,10 +2,12 @@ from unittest import mock
 
 from advent_of_code2021.day_4 import (
     extract_data,
-    first_winner_strategy,
+    has_winner,
     update_board,
     game,
     main,
+    first_winner_strategy,
+    last_winner_strategy,
 )
 
 
@@ -145,7 +147,7 @@ def test_update_board():
         update_board(boards, number)
 
     assert expected_boards == boards
-    assert first_winner_strategy(boards) == (False, None)
+    assert has_winner(boards) == [[False, 0], [False, 1], [False, 2]]
 
     numbers = [
         17,
@@ -183,7 +185,7 @@ def test_update_board():
         update_board(boards, number)
 
     assert expected_boards == boards
-    assert first_winner_strategy(boards) == (False, None)
+    assert has_winner(boards) == [[False, 0], [False, 1], [False, 2]]
 
     numbers = [
         24,
@@ -216,7 +218,7 @@ def test_update_board():
         update_board(boards, number)
 
     assert expected_boards == boards
-    assert first_winner_strategy(boards) == (True, 2)
+    assert has_winner(boards) == [[False, 0], [False, 1], [True, 2]]
 
 
 def test_has_winner_vertical():
@@ -230,7 +232,7 @@ def test_has_winner_vertical():
         ],
     ]
 
-    assert first_winner_strategy(boards) == (True, 0)
+    assert True in [wb[0] for wb in has_winner(boards)]
 
     boards = [
         [
@@ -242,10 +244,10 @@ def test_has_winner_vertical():
         ],
     ]
 
-    assert first_winner_strategy(boards) == (True, 0)
+    assert True in [wb[0] for wb in has_winner(boards)]
 
 
-def test_game():
+def test_game_first_winner():
     numbers = [
         7,
         4,
@@ -308,7 +310,7 @@ def test_game():
 @mock.patch("advent_of_code2021.day_4.game")
 @mock.patch("advent_of_code2021.day_4.extract_data")
 @mock.patch("advent_of_code2021.day_4.get_data_from_file")
-def test_main(
+def test_main_first_winner_strategy(
     mocked_get_data_from_file, mocked_extract_data, mocked_game, mocked_print
 ):
     mocked_get_data_from_file.return_value = "file_data"
@@ -320,3 +322,80 @@ def test_main(
     mocked_extract_data.assert_called_once_with("file_data")
     mocked_game.assert_called_once_with("numbers", "boards", first_winner_strategy)
     mocked_print.assert_called_once_with("The score is 4512")
+
+
+@mock.patch("builtins.print")
+@mock.patch("advent_of_code2021.day_4.game")
+@mock.patch("advent_of_code2021.day_4.extract_data")
+@mock.patch("advent_of_code2021.day_4.get_data_from_file")
+def test_main_last_winner_strategy(
+    mocked_get_data_from_file, mocked_extract_data, mocked_game, mocked_print
+):
+    mocked_get_data_from_file.return_value = "file_data"
+    mocked_extract_data.return_value = "numbers", "boards"
+    mocked_game.return_value = 1924
+    filename = "file.txt"
+    main(filename, last_winner_strategy)
+    mocked_get_data_from_file.assert_called_once_with(filename)
+    mocked_extract_data.assert_called_once_with("file_data")
+    mocked_game.assert_called_once_with("numbers", "boards", last_winner_strategy)
+    mocked_print.assert_called_once_with("The score is 1924")
+
+
+def test_game_last_winner():
+    numbers = [
+        7,
+        4,
+        9,
+        5,
+        11,
+        17,
+        23,
+        2,
+        0,
+        14,
+        21,
+        24,
+        10,
+        16,
+        13,
+        6,
+        15,
+        25,
+        12,
+        22,
+        18,
+        20,
+        8,
+        19,
+        3,
+        26,
+        1,
+    ]
+
+    boards = [
+        [
+            [[22, False], [13, False], [17, False], [11, False], [0, False]],
+            [[8, False], [2, False], [23, False], [4, False], [24, False]],
+            [[21, False], [9, False], [14, False], [16, False], [7, False]],
+            [[6, False], [10, False], [3, False], [18, False], [5, False]],
+            [[1, False], [12, False], [20, False], [15, False], [19, False]],
+        ],
+        [
+            [[3, False], [15, False], [0, False], [2, False], [22, False]],
+            [[9, False], [18, False], [13, False], [17, False], [5, False]],
+            [[19, False], [8, False], [7, False], [25, False], [23, False]],
+            [[20, False], [11, False], [10, False], [24, False], [4, False]],
+            [[14, False], [21, False], [16, False], [12, False], [6, False]],
+        ],
+        [
+            [[14, False], [21, False], [17, False], [24, False], [4, False]],
+            [[10, False], [16, False], [15, False], [9, False], [19, False]],
+            [[18, False], [8, False], [23, False], [26, False], [20, False]],
+            [[22, False], [11, False], [13, False], [6, False], [5, False]],
+            [[2, False], [0, False], [12, False], [3, False], [7, False]],
+        ],
+    ]
+
+    score = game(numbers, boards, last_winner_strategy)
+    assert score == 1924

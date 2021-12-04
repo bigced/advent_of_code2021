@@ -35,15 +35,16 @@ def get_elements(data):
     return data.split("\n\n")
 
 
-def first_winner_strategy(boards):
+def has_winner(boards):
+    winner_boards = []
     for board_number, board in enumerate(boards):
         is_winner = False
-        is_winner = check_vertical_win(board, is_winner)
-        is_winner = check_line_win(board, is_winner)
-        if is_winner:
-            return True, board_number
+        is_winner = check_vertical_win(board, is_winner) or check_line_win(
+            board, is_winner
+        )
+        winner_boards.append([is_winner, board_number])
 
-    return False, None
+    return winner_boards
 
 
 def check_line_win(board, is_winner):
@@ -78,13 +79,75 @@ def update_board(boards, number):
 
 
 def game(numbers, boards, winner_strategy):
+    score = winner_strategy(boards, numbers)
+    return score
+
+
+def first_winner_strategy(boards, numbers):
     for number in numbers:
         update_board(boards, number)
-        win, board_number = winner_strategy(boards)
-        if win:
+        winner_boards = has_winner(boards)
+        board_number = None
+        has_win = None
+        for wb in winner_boards:
+            if wb[0]:
+                board_number = wb[1]
+                has_win = True
+                break
+
+        if has_win:
             board = boards[board_number]
             unmarked_number_sum = sum_unmarked_numbers(board)
             return number * unmarked_number_sum
+            break
+
+
+def last_winner_strategy(boards, numbers):
+    winning_numbers = []
+    last_board = last_winner_strategy_run_numbers(boards, numbers, winning_numbers)
+    last_number = winning_numbers[-1]
+    unmarked_sum = sum_unmarked_numbers(last_board)
+    score = last_number * unmarked_sum
+    return score
+
+
+def last_winner_strategy_run_numbers(boards, numbers, winning_numbers):
+    last_board = None
+    for number in numbers:
+        update_board(boards, number)
+        winner_status = has_winner(boards)
+        last_board = update_last_winning_board_and_number(
+            boards, last_board, number, winner_status, winning_numbers
+        )
+    return last_board
+
+
+def update_last_winning_board_and_number(
+    boards, last_board, number, winner_status, winning_numbers
+):
+    winning_board_numbers = []
+    for ws in winner_status:
+        if ws[0]:
+            last_board = get_winning_board_data(
+                boards, last_board, number, winning_board_numbers, winning_numbers, ws
+            )
+    remove_winning_board(boards, winning_board_numbers)
+    return last_board
+
+
+def get_winning_board_data(
+    boards, last_board, number, winning_board_numbers, winning_numbers, ws
+):
+    board_number = ws[1]
+    winning_numbers.append(number)
+    last_board = boards[board_number]
+    winning_board_numbers.append(board_number)
+    return last_board
+
+
+def remove_winning_board(boards, winning_board_numbers):
+    for board_number in winning_board_numbers[::-1]:
+        del boards[board_number]
 
 
 def sum_unmarked_numbers(board):
@@ -105,3 +168,4 @@ def main(filename, winner_strategy):
 
 if __name__ == "__main__":
     main("day_4.txt", first_winner_strategy)
+    main("day_4.txt", last_winner_strategy)
