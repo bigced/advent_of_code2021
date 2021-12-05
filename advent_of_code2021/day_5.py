@@ -37,7 +37,39 @@ def draw_vectors_on_graph(graph, x0, x1, y0, y1):
         graph = draw_vertical_line(graph, x1, y0, y1)
     elif y0 == y1:
         graph = draw_horizontal_line(graph, x0, x1, y0, y1)
+    else:
+        graph = draw_diagonal_line(graph, x0, x1, y0, y1)
     return graph
+
+
+def draw_diagonal_line(graph, x0, x1, y0, y1):
+    # diagonals are all 45 degrees.  We can assume x and y have the same length
+    x_positions = get_x_positions(x0, x1)
+    y_positions = get_y_positions(y0, y1)
+
+    update_graph_with_diagonal(graph, x_positions, y_positions)
+    return graph
+
+
+def update_graph_with_diagonal(graph, x_positions, y_positions):
+    for i in range(len(x_positions)):
+        graph[y_positions[i]][x_positions[i]] += 1
+
+
+def get_y_positions(y0, y1):
+    return [y for y in range(y0, calculate_range_end(y0, y1), get_range_step(y0, y1))]
+
+
+def get_x_positions(x0, x1):
+    return [x for x in range(x0, calculate_range_end(x0, x1), get_range_step(x0, x1))]
+
+
+def get_range_step(x0, x1):
+    return -1 if x0 > x1 else 1
+
+
+def calculate_range_end(x0, x1):
+    return x1 - 1 if x0 > x1 else x1 + 1
 
 
 def draw_horizontal_line(graph, x0, x1, y0, y1):
